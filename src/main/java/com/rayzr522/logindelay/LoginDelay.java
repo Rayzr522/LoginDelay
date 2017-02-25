@@ -1,110 +1,49 @@
 package com.rayzr522.logindelay;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Level;
-
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.ChatColor;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import com.rayzr522.creativelynamedlib.config.Messages;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * @author Rayzr
  */
-public class LoginDelay extends JavaPlugin {
-    private static LoginDelay instance;
-
-    private Messages lang = new Messages();
+public class LoginDelay extends JavaPlugin implements Listener {
+    boolean nopeScrewYouTheServerIsntReadyYetStopTryingToJoin = true;
 
     @Override
     public void onEnable() {
-        instance = this;
+        saveDefaultConfig();
 
-        reload();
+        getServer().getPluginManager().registerEvents(this, this);
+
+        long delay = (long) (20L * getConfig().getDouble("delay"));
+        if (delay < 1)
+            delay = 1L;
+
+        new BukkitRunnable() {
+            public void run() {
+                getLogger().info("Allowing players to connect");
+                nopeScrewYouTheServerIsntReadyYetStopTryingToJoin = false;
+            }
+        }.runTaskLater(this, delay);
     }
-    
+
     @Override
     public void onDisable() {
-        instance = null;
-    }
-    
-    /**
-     * (Re)loads all configs from the disk
-     */
-    public void reload() {
-        saveDefaultConfig();
-        reloadConfig();
-        
-        lang.load(getConfig("messages.yml"));
+        nopeScrewYouTheServerIsntReadyYetStopTryingToJoin = true;
     }
 
-    /**
-     * If the file is not found and there is a default file in the JAR, it saves the default file to the plugin data folder first
-     * 
-     * @param path The path to the config file (relative to the plugin data folder)
-     * @return The {@link YamlConfiguration}
-     */
-    public YamlConfiguration getConfig(String path) {
-        if (!getFile(path).exists() && getResource(path) != null) {
-            saveResource(path, true);
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onJoin(PlayerLoginEvent e) {
+        if (nopeScrewYouTheServerIsntReadyYetStopTryingToJoin) {
+            e.setKickMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("kick-message")));
+            e.setResult(Result.KICK_OTHER);
         }
-        return YamlConfiguration.loadConfiguration(getFile(path));
-    }
-    
-    /**
-     * Attempts to save a {@link YamlConfiguration} to the disk, and any {@link IOException}s are printed to the console
-     * 
-     * @param config The config to save
-     * @param path The path to save the config file to (relative to the plugin data folder)
-     */
-    public void saveConfig(YamlConfiguration config, String path) {
-        try {
-            config.save(getFile(path));
-        } catch (IOException e) {
-            getLogger().log(Level.SEVERE, "Failed to save config", e);
-        }
-    }
-
-    /**
-     * @param path The path of the file (relative to the plugin data folder)
-     * @return The {@link File}
-     */
-    public File getFile(String path) {
-        return new File(getDataFolder(), path.replace('/', File.pathSeparatorChar));
-    }
-    
-    /**
-     * Returns a message from the language file
-     * 
-     * @param key The key of the message to translate
-     * @param objects The formatting objects to use
-     * @return The formatted message
-     */
-    public String tr(String key, Object... objects) {
-        return lang.tr(key, objects);
-    }
-
-    /**
-     * Returns a message from the language file without adding the prefix
-     * 
-     * @param key The key of the message to translate
-     * @param objects The formatting objects to use
-     * @return The formatted message
-     */
-    public String trRaw(String key, Object... objects) {
-        return lang.trRaw(key, objects);
-    }
-
-    /**
-     * @return The {@link Messages} instance for this plugin
-     */
-    public Messages getLang() {
-        return lang;
-    }
-    
-    public static LoginDelay getInstance() {
-        return instance;
     }
 
 }

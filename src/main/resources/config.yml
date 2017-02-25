@@ -1,0 +1,5 @@
+# The message to display when they try to join (default: "&cThe server is still loading!") 
+kick-message: "&cThe server is still loading!"
+
+# How long to wait before allowing people to connect in seconds (default: 5.0)
+delay: 5.0
