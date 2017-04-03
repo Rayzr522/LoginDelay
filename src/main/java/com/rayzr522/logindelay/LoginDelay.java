@@ -13,7 +13,10 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author Rayzr
  */
 public class LoginDelay extends JavaPlugin implements Listener {
-    boolean nopeScrewYouTheServerIsntReadyYetStopTryingToJoin = true;
+    private boolean nopeScrewYouTheServerIsntReadyYetStopTryingToJoin = true;
+    private long delay;
+
+    private long start;
 
     @Override
     public void onEnable() {
@@ -21,9 +24,12 @@ public class LoginDelay extends JavaPlugin implements Listener {
 
         getServer().getPluginManager().registerEvents(this, this);
 
-        long delay = (long) (20L * getConfig().getDouble("delay"));
-        if (delay < 1)
+        delay = (long) (20L * getConfig().getDouble("delay"));
+        if (delay < 1) {
             delay = 1L;
+        }
+
+        start = System.currentTimeMillis();
 
         new BukkitRunnable() {
             public void run() {
@@ -41,7 +47,9 @@ public class LoginDelay extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onJoin(PlayerLoginEvent e) {
         if (nopeScrewYouTheServerIsntReadyYetStopTryingToJoin) {
-            e.setKickMessage(ChatColor.translateAlternateColorCodes('&', getConfig().getString("kick-message")));
+            String time = Integer.toString((int) (delay - Math.round(System.currentTimeMillis() - start) / 50) / 20);
+            String message = getConfig().getString("kick-message").replace("{time}", time);
+            e.setKickMessage(ChatColor.translateAlternateColorCodes('&', message));
             e.setResult(Result.KICK_OTHER);
         }
     }

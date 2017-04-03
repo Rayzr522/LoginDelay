@@ -1,12 +1,5 @@
 main: com.rayzr522.logindelay.LoginDelay
 name: LoginDelay
-version: 1.0.0
+version: 1.0.1
 description: Prevents people from logging in the moment the server boots up
 author: Rayzr
-#depend: [CreativelyNamedLib]
-#commands:
-#  logindelay:
-#    description: LoginDelay main command
-#    aliases: [alias1,alias2]
-#    usage: "/logindelay [command]"
-#    permission: LoginDelay.main

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.rayzr522</groupId>
     <artifactId>logindelay</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>LoginDelay</name>
     <description>Prevents people from logging in the moment the server boots up</description>
     <repositories>
